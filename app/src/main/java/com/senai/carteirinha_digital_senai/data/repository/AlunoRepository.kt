@@ -1,20 +1,24 @@
 package com.senai.carteirinha_digital_senai.data.repository
 
-import com.senai.carteirinha_digital_senai.data.local.AlunoDAO
-import com.senai.carteirinha_digital_senai.data.model.Aluno
-import kotlinx.coroutines.flow.Flow
+import com.senai.carteirinha_digital_senai.data.local.DataStoreManager
+import com.senai.carteirinha_digital_senai.data.remote.RetrofitClient
+import com.senai.carteirinha_digital_senai.data.remote.model.Aluno
 
-class AlunoRepository (private val alunoDao: AlunoDAO) {
-    // Retorna o Flow do banco de dados (sempre atualizado)
-    val aluno: Flow<Aluno?> = alunoDao.getAluno()
+class AlunoRepository(private val dataStoreManager: DataStoreManager) {
 
-    // Função para salvar ou atualizar o aluno
-    suspend fun salvarAluno(aluno: Aluno) {
-        alunoDao.insertOrUpdate(aluno)
-    }
+    // Busca o aluno diretamente do servidor
+    suspend fun obterDadosDoAluno(): Result<Aluno> {
+        return try {
+            // Retrofit + OkHttp (com Token injetado)
+            val response = RetrofitClient.getCarteirinhaApi(dataStoreManager).getDadosAluno()
 
-    // Encaminha a operação de exclusão para o DAO
-    suspend fun deletarAluno() {
-        alunoDao.deletarAluno()
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("Erro ao buscar dados do servidor. Código: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception("Erro de conexão: Verifique sua internet."))
+        }
     }
 }

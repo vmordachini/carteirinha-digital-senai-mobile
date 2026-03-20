@@ -1,31 +1,34 @@
 package com.senai.carteirinha_digital_senai.data.repository
 
-import android.content.Context
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
+import com.senai.carteirinha_digital_senai.data.local.DataStoreManager
+import com.senai.carteirinha_digital_senai.data.remote.api.AuthApi
+import com.senai.carteirinha_digital_senai.data.remote.model.LoginRequest
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
+// recebe a API e o DataStoreManager
+class AuthRepository(
+    private val api: AuthApi,
+    private val dataStoreManager: DataStoreManager
+) {
+    // Repassa o fluxo do DataStoreManager para a ViewModel
+    val authToken: Flow<String?> = dataStoreManager.authToken
 
-// Extensão para usar DataStore (forma moderna de salvar preferências)
-private val Context.dataStore by preferencesDataStore(name = "auth_prefs")
-
-class AuthRepository(private val context: Context) {
-    private val PIN_KEY = stringPreferencesKey("user_pin")
-
-    // Recupera o PIN salvo
-    val userPin: Flow<String?> = context.dataStore.data.map { it[PIN_KEY] }
-
-    // Salva um novo PIN (Cadastro de senha)
-    suspend fun salvarPin(pin: String) {
-        context.dataStore.edit { it[PIN_KEY] = pin }
+    suspend fun fazerLoginNaApi(matricula: String, senha: String): Result<Boolean> {
+        return try {
+            val response = api.fazerLogin(LoginRequest(matricula, senha))
+            if (response.isSuccessful && response.body() != null) {
+                // Pede para o DataStoreManager salvar!
+                dataStoreManager.salvarToken(response.body()!!.token)
+                Result.success(true)
+            } else {
+                Result.failure(Exception("Credenciais inválidas"))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception("Erro de conexão"))
+        }
     }
 
-    // Em AuthRepository.kt
-    suspend fun resetarPin() {
-        context.dataStore.edit { preferences ->
-            preferences.remove(PIN_KEY)
-        }
+    suspend fun fazerLogout() {
+        dataStoreManager.limparToken()
     }
 }

@@ -70,7 +70,17 @@ fun DadosAlunoScreen(
 
         Button(
             onClick = {
-                viewModel.salvarAluno(nome, curso, matricula, fotoUri, codigoQr)
+                // 1. Criamos o objeto Aluno com os dados digitados na tela
+                val novoAluno = com.senai.carteirinha_digital_senai.data.remote.model.Aluno(
+                    nome = nome,
+                    curso = curso,
+                    matricula = matricula,
+                    fotoUri = fotoUri,
+                    codigoQr = codigoQr
+                )
+
+                // 2. Passamos o objeto único para a ViewModel
+                viewModel.salvarAluno(novoAluno)
                 onDadosSalvos()
             },
             modifier = Modifier.fillMaxWidth(),

@@ -1,4 +1,4 @@
-package com.senai.carteirinha_digital_senai.data.model
+package com.senai.carteirinha_digital_senai.data.remote.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

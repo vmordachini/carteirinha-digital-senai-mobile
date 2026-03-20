@@ -66,5 +66,12 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     // Jetpack DataStore (Preferências)
     implementation(libs.androidx.datastore.preferences)
+    // Retrofit + Gson (Comunicação com API)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+
+    // OkHttp (Interceptador para Token JWT)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
 
 }
