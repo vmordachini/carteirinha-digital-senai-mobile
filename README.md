@@ -1,38 +1,79 @@
 # 🪪 Carteirinha Digital SENAI
 
-Este é um projeto mobile desenvolvido em **Kotlin** com **Jetpack Compose**. A aplicação funciona como uma carteirinha de estudante digital para alunos do SENAI-SP, contando agora com integração a uma API REST para autenticação (Login) e busca de dados do perfil do aluno.
+Aplicativo Android nativo desenvolvido para servir como a carteirinha digital de estudante dos alunos do SENAI-SP. O projeto utiliza as práticas mais modernas de desenvolvimento Android, focado em uma interface puramente declarativa e arquitetura robusta.
 
-## 🚀 Funcionalidades
-- **Autenticação:** Sistema de Login integrado com a API, utilizando token JWT armazenado de forma segura localmente.
-- **Navegação Inteligente:** Roteamento dinâmico que direciona o utilizador para o Login, Configuração de Perfil ou diretamente para a Carteirinha com base no estado de autenticação.
-- **Consumo de API:** Busca de dados atualizados do aluno diretamente do servidor.
-- **Identificação Visual:** Exibição do logótipo oficial do SENAI-SP e foto do aluno carregada via URL.
-- **QR Code Dinâmico:** Geração automática de QR Code baseado no código de identificação utilizando a biblioteca ZXing.
-- **Gestão de Sessão:** Funcionalidade de logout para limpar dados de acesso e retornar à tela inicial.
+---
 
-## 🛠️ Tecnologias e Arquitetura
-O projeto segue a arquitetura **MVVM** e utiliza as seguintes tecnologias:
-- **UI Framework:** Jetpack Compose com Material Design 3.
-- **Navegação:** Jetpack Navigation Compose.
-- **Comunicação Web:** Retrofit e OkHttp (com intercetores para injeção de Token JWT).
-- **Armazenamento Local:** Jetpack DataStore (Preferências) para tokens e Room Database para persistência.
-- **Gestão de Imagens:** Coil para carregamento assíncrono de fotos.
-- **Geração de QR Code:** ZXing (Zebra Crossing).
+## ✨ Funcionalidades (Features)
 
-## 📁 Estrutura do Projeto
-A aplicação foi modularizada para melhor escalabilidade:
-- **`core/`**: Contém o sistema de roteamento (`AppNavHost`, `Routes`), utilitários (`QrCode.kt`) e o design system (Theme, Color, Type).
-- **`data/`**: Responsável pela camada de dados. Inclui a base de dados local (`DataStoreManager`), configuração de rede (`RetrofitClient`, APIs, Interceptors) e os repositórios (`AlunoRepository`, `AuthRepository`).
-- **`features/`**: Agrupa as funcionalidades principais da app:
-  - **`auth/`**: Ecrãs de login e ViewModels de autenticação.
-  - **`carteirinha/`**: Ecrã principal do cartão, componentes visuais e ViewModel do aluno.
-  - **`configuracao/`**: Ecrã para preenchimento ou edição dos dados do aluno.
+### 🔐 Autenticação e Sessão
+- [x] Tela de Login (Matrícula/Email e Senha)
+- [x] Comunicação via API REST (POST `/auth/login`)
+- [x] Interceptação de requisições para injeção de Token no Header (`AuthInterceptor`)
+- [x] Armazenamento local e seguro do Token JWT
+- [x] Funcionalidade de Logout (Limpeza de token e cache)
+- [x] Redirecionamento inteligente baseado no estado da sessão (Logado vs Deslogado)
 
-## 📥 Instalação e Execução
-Para executar este projeto localmente, siga os passos abaixo:
-1. **Clone o repositório:**
-   `git clone https://github.com/seu-usuario/carteirinha-digital-senai.git`
-2. **Configuração da API:** No ficheiro `RetrofitClient.kt`, certifique-se de que a variável `BASE_URL` está a apontar para o servidor correto (atualmente `https://api.exemplo-senai.com.br/v1/`).
-3. **Abra no Android Studio:** Certifique-se de estar a utilizar uma versão compatível (Ladybug ou superior). O projeto requer o SDK 36 e utiliza Java 11 / JDK 21.
-4. **Sincronize o Gradle:** Aguarde o download das dependências (Retrofit, DataStore, Compose, etc).
-5. **Execute a App:** Ligue um dispositivo físico ou utilize um emulador com Android 7.0 (API 24) ou superior.
+### 👤 Perfil do Aluno
+- [x] Tela de Configuração/Preenchimento de Dados
+- [x] Inserção de Nome, Curso e Matrícula
+- [x] Seleção de foto de perfil (Galeria do dispositivo)
+- [x] Carregamento de imagem de fallback/placeholder
+
+### 🎟️ Carteirinha Digital
+- [x] Interface baseada no Material Design 3
+- [x] Exibição dos dados consolidados do aluno
+- [x] Geração dinâmica de QR Code na tela a partir de texto/matrícula
+- [x] Bloqueio de retorno para tela de login ao usar a carteirinha (Gestão de pilha de navegação)
+
+---
+
+## 🛠️ Tecnologias e Bibliotecas Utilizadas
+
+- **Linguagem & UI**
+  - [x] Kotlin
+  - [x] Jetpack Compose (Construção de UI Declarativa)
+  - [x] Navigation Compose (Roteamento de Telas)
+  - [x] Material Design 3
+
+- **Arquitetura & Padrões**
+  - [x] MVVM (Model-View-ViewModel)
+  - [x] StateFlow / Coroutines (Programação Assíncrona e Reativa)
+  - [x] Injeção de Dependência (Factory manual / *A avaliar uso de Hilt/Dagger futuramente*)
+
+- **Comunicação & Rede**
+  - [x] Retrofit2
+  - [x] OkHttp3 (com Interceptors)
+  - [x] GSON (Serialização/Desserialização JSON)
+
+- **Armazenamento Local & Mídia**
+  - [x] Preferences DataStore (Persistência do JWT)
+  - [x] Room Database (Configurado para futura persistência da entidade `Aluno`)
+  - [x] Coil (Carregamento assíncrono de imagens)
+  - [x] ZXing Core (Geração de matriz do QR Code)
+
+---
+
+## ⚙️ Como Executar o Projeto
+
+Para rodar este projeto na sua máquina local, certifique-se de completar os seguintes passos:
+
+- [ ] Instalar o **Android Studio** (versão mais recente recomendada).
+- [ ] Clonar este repositório: `git clone <link-do-repositorio>`.
+- [ ] Abrir o projeto no Android Studio.
+- [ ] Aguardar o *Sync* do Gradle (baixar todas as dependências marcadas no `build.gradle.kts`).
+- [ ] Configurar a **URL Base da API** no arquivo `RetrofitClient.kt`.
+- [ ] Executar o projeto (`Shift + F10`) em um Emulador (AVD) ou Smartphone Físico (via USB Debugging/Wi-Fi).
+
+---
+
+## 📝 Backlog e Próximos Passos (To-Do)
+
+Aqui estão as próximas melhorias mapeadas para o ciclo de vida do projeto:
+
+- [ ] **Cache Offline:** Finalizar a implementação do repositório local usando o Room para permitir que a carteirinha seja aberta mesmo sem internet.
+- [ ] **Tratamento de Erros:** Melhorar o feedback visual na UI em casos de timeout da API ou falha de rede (ex: Snackbars).
+- [ ] **Testes Unitários:** Implementar testes para `AuthViewModel` e `AlunoViewModel`.
+- [ ] **Testes de UI:** Criar testes instrumentados para as telas em Jetpack Compose.
+- [ ] **Injeção de Dependência:** Migrar a criação manual de ViewModels (Factories) para o **Hilt**.
+- [ ] **Segurança:** Implementar criptografia no DataStore (Preferences DataStore -> EncryptedSharedPreferences/Proto DataStore) para aumentar a segurança do JWT.
