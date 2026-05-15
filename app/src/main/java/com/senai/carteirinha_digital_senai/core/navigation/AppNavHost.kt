@@ -3,6 +3,7 @@ package com.senai.carteirinha_digital_senai.core.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -11,25 +12,27 @@ import com.senai.carteirinha_digital_senai.features.auth.viewmodel.AuthViewModel
 import com.senai.carteirinha_digital_senai.features.carteirinha.presentation.screen.CarteirinhaScreen
 import com.senai.carteirinha_digital_senai.features.carteirinha.viewmodel.AlunoViewModel
 import com.senai.carteirinha_digital_senai.features.configuracao.ui.DadosAlunoScreen
+import com.senai.carteirinha_digital_senai.features.home.presentation.screen.HomeScreen
+import com.senai.carteirinha_digital_senai.features.home.viewmodel.HomeViewModel
 
 @Composable
 fun AppNavHost(
     navController: NavHostController,
     authViewModel: AuthViewModel,
-    alunoViewModel: AlunoViewModel
+    alunoViewModel: AlunoViewModel,
+    homeViewModel: HomeViewModel = viewModel() // Instanciado aqui ou passado pela MainActivity
 ) {
-    // Observamos os estados para saber para onde enviar o usuário
     val authToken by authViewModel.authToken.collectAsState()
     val aluno by alunoViewModel.alunoState.collectAsState()
 
-    // 2. Lógica Inteligente de Rota:
-    // Se não tem token -> Tela de Login
-    // Se tem token, mas não tem aluno -> Configurar (provisório)
-    // Se tem token e tem aluno -> Direto para a Carteirinha!
+    // Lógica de Destino Inicial:
+    // 1. Sem token -> Login
+    // 2. Com token mas sem perfil preenchido -> Configurar
+    // 3. Tudo ok -> Home (Lista de Disciplinas)
     val destinoInicial = when {
         authToken.isNullOrEmpty() -> Routes.Login.route
         aluno == null -> Routes.Configurar.route
-        else -> Routes.Carteirinha.route
+        else -> Routes.Home.route
     }
 
     NavHost(
@@ -40,13 +43,34 @@ fun AppNavHost(
         // --- TELA DE LOGIN ---
         composable(Routes.Login.route) {
             LoginScreen(viewModel = authViewModel) {
-                // Ao fazer login com sucesso na API, decide para onde ir
-                val proximaRota = if (aluno == null) Routes.Configurar.route else Routes.Carteirinha.route
+                // Ao logar, vai para Home ou Configurar
+                val proximaRota = if (aluno == null) Routes.Configurar.route else Routes.Home.route
                 navController.navigate(proximaRota) {
-                    // Remove a tela de login do histórico para não voltar com o botão "Voltar" do celular
                     popUpTo(Routes.Login.route) { inclusive = true }
                 }
             }
+        }
+
+        // --- TELA DE FORMULÁRIO (Configurar) ---
+        composable(Routes.Configurar.route) {
+            DadosAlunoScreen(
+                viewModel = alunoViewModel,
+                onDadosSalvos = {
+                    navController.navigate(Routes.Home.route) {
+                        popUpTo(Routes.Configurar.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // --- TELA DE HOME (Lista de UCs) ---
+        composable(Routes.Home.route) {
+            HomeScreen(
+                viewModel = homeViewModel,
+                onNavigateToCarteirinha = {
+                    navController.navigate(Routes.Carteirinha.route)
+                }
+            )
         }
 
         // --- TELA DA CARTEIRINHA ---
@@ -56,27 +80,14 @@ fun AppNavHost(
                     aluno = dados,
                     onEditar = { navController.navigate(Routes.Configurar.route) },
                     onDeletar = {
-                        // Agora o deletar faz logout da API e limpa os dados
                         authViewModel.fazerLogout()
                         alunoViewModel.deletarAluno()
                         navController.navigate(Routes.Login.route) {
-                            popUpTo(Routes.Carteirinha.route) { inclusive = true }
+                            popUpTo(Routes.Home.route) { inclusive = true }
                         }
                     }
                 )
             }
-        }
-
-        // --- TELA DE FORMULÁRIO (Configurar) ---
-        composable(Routes.Configurar.route) {
-            DadosAlunoScreen(
-                viewModel = alunoViewModel,
-                onDadosSalvos = {
-                    navController.navigate(Routes.Carteirinha.route) {
-                        popUpTo(Routes.Configurar.route) { inclusive = true }
-                    }
-                }
-            )
         }
     }
 }

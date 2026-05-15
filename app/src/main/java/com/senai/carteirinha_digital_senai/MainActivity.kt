@@ -17,6 +17,7 @@ import com.senai.carteirinha_digital_senai.features.auth.viewmodel.AuthViewModel
 import com.senai.carteirinha_digital_senai.features.auth.viewmodel.AuthViewModelFactory
 import com.senai.carteirinha_digital_senai.features.carteirinha.viewmodel.AlunoViewModel
 import com.senai.carteirinha_digital_senai.features.carteirinha.viewmodel.AlunoViewModelFactory
+import com.senai.carteirinha_digital_senai.features.home.viewmodel.HomeViewModel // NOVA LINHA: Importação
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,6 +40,9 @@ class MainActivity : ComponentActivity() {
                 val authViewModel: AuthViewModel = viewModel(factory = authFactory)
                 val alunoViewModel: AlunoViewModel = viewModel(factory = alunoFactory)
 
+                //Instanciando a viewModel da Home (não precisa de factory pois está usando o Fake Repository internamente por enquanto)
+                val homeViewModel: HomeViewModel = viewModel()
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -47,7 +51,8 @@ class MainActivity : ComponentActivity() {
                     AppNavHost(
                         navController = navController,
                         authViewModel = authViewModel,
-                        alunoViewModel = alunoViewModel
+                        alunoViewModel = alunoViewModel,
+                        homeViewModel = homeViewModel
                     )
                 }
             }

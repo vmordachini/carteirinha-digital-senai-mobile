@@ -7,6 +7,8 @@ sealed class Routes (val route: String) {
     object Login : Routes("login")
     object Carteirinha : Routes("carteirinha")
 
+    object Home : Routes("home")
+
     // Manteremos a rota de configurar por enquanto para não quebrar o app atual,
     // mas ela será removida no Passo 5 quando a API for conectada.
     object Configurar : Routes("configurar")
