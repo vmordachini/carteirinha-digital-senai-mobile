@@ -1,8 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-
     alias(libs.plugins.google.ksp)
+    alias(libs.plugins.dagger.hilt.android)
 }
 
 android {
@@ -73,5 +73,10 @@ dependencies {
     // OkHttp (Interceptador para Token JWT)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
+
+    // Hilt (Injeção de Dependência)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
 }

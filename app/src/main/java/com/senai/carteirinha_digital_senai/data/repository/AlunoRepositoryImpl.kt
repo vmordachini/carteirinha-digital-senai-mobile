@@ -1,0 +1,25 @@
+package com.senai.carteirinha_digital_senai.data.repository
+
+import com.senai.carteirinha_digital_senai.data.local.DataStoreManager
+import com.senai.carteirinha_digital_senai.domain.model.Aluno
+import com.senai.carteirinha_digital_senai.domain.repository.AlunoRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
+
+class AlunoRepositoryImpl @Inject constructor(
+    private val dataStoreManager: DataStoreManager
+) : AlunoRepository {
+
+    private val _alunoState = MutableStateFlow<Aluno?>(null)
+    override val alunoState: Flow<Aluno?> = _alunoState.asStateFlow()
+
+    override suspend fun salvarAluno(aluno: Aluno) {
+        _alunoState.value = aluno
+    }
+
+    override suspend fun deletarAluno() {
+        _alunoState.value = null
+    }
+}

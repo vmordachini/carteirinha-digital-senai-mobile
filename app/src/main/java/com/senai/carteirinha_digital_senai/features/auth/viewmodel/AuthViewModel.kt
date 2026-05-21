@@ -2,57 +2,34 @@ package com.senai.carteirinha_digital_senai.features.auth.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.senai.carteirinha_digital_senai.data.repository.AuthRepository
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.senai.carteirinha_digital_senai.domain.repository.AuthRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
-    // 1. Observa o Token
-    val authToken = repository.authToken.stateIn(
+    val authToken = authRepository.authToken.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = null
     )
 
-    // 2. Estado de Carregamento (para desativar o botão enquanto aguarda a API)
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading
-
-    // 3. Estado de Erro (para mostrar na UI caso a API rejeite o login)
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage
-
-    // Função que a Interface (LoginScreen) vai chamar
-    fun fazerLogin(matricula: String, senha: String, onSuccess: () -> Unit) {
+    fun login(matricula: String, senha: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
-            _isLoading.value = true
-            _errorMessage.value = null // Limpa erros anteriores
-
-            val result = repository.fazerLoginNaApi(matricula, senha)
-
-            if (result.isSuccess) {
-                onSuccess() // Navega para a Carteirinha
-            } else {
-                // Pega a mensagem de erro que veio do Repository
-                _errorMessage.value = result.exceptionOrNull()?.message ?: "Erro ao fazer login"
-            }
-
-            _isLoading.value = false
+            val result = authRepository.fazerLogin(matricula, senha)
+            onResult(result.isSuccess)
         }
     }
 
     fun fazerLogout() {
         viewModelScope.launch {
-            repository.fazerLogout()
+            authRepository.fazerLogout()
         }
-    }
-
-    // Ajuda a limpar o erro quando o utilizador volta a digitar
-    fun limparErro() {
-        _errorMessage.value = null
     }
 }
