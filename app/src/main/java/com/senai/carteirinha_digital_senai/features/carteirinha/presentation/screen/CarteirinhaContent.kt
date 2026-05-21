@@ -1,5 +1,6 @@
 package com.senai.carteirinha_digital_senai.features.carteirinha.presentation.screen
 
+import androidx.compose.runtime.remember
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -75,7 +76,11 @@ fun CarteirinhaContent(
 
                 InfoAluno(nome = aluno.nome, curso = aluno.curso, matricula = aluno.matricula)
 
-                val qrCodeBitmap = gerarQrCode(aluno.codigoQr)
+                // Envolvido em remember para não recriar o bitmap a cada recomposição
+                val qrCodeBitmap = remember(aluno.codigoQr) {
+                    gerarQrCode(aluno.codigoQr)
+                }
+
                 if (qrCodeBitmap != null) {
                     Image(
                         bitmap = qrCodeBitmap.asImageBitmap(),
