@@ -8,7 +8,6 @@ import com.senai.carteirinha_digital_senai.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-// Adicionamos a anotação @Inject constructor para o Hilt saber como instanciar esta classe
 class AuthRepositoryImpl @Inject constructor(
     private val authApi: AuthApi,
     private val dataStoreManager: DataStoreManager
@@ -18,7 +17,7 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun fazerLogin(matricula: String, senha: String): Result<LoginResponse> {
         return try {
-            val response = authApi.login(LoginRequest(matricula, senha))
+            val response = authApi.fazerLogin(LoginRequest(matricula, senha))
             if (response.isSuccessful && response.body() != null) {
                 val body = response.body()!!
                 dataStoreManager.salvarToken(body.token)
@@ -29,6 +28,10 @@ class AuthRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    override suspend fun simularLogin() {
+        dataStoreManager.salvarToken("fake-jwt-token-demo")
     }
 
     override suspend fun fazerLogout() {

@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.senai.carteirinha_digital_senai.domain.model.Aluno
 import com.senai.carteirinha_digital_senai.features.carteirinha.viewmodel.AlunoViewModel
 
 @Composable
@@ -19,14 +20,12 @@ fun DadosAlunoScreen(
 ) {
     val alunoExistente by viewModel.alunoState.collectAsState()
 
-    // Estados locais para o formulário
     var nome by remember { mutableStateOf("") }
     var curso by remember { mutableStateOf("") }
     var matricula by remember { mutableStateOf("") }
     var codigoQr by remember { mutableStateOf("") }
     var fotoUri by remember { mutableStateOf<String?>(null) }
 
-    // Preenche os campos se já houver um aluno cadastrado (Update)
     LaunchedEffect(alunoExistente) {
         alunoExistente?.let {
             nome = it.nome
@@ -37,7 +36,6 @@ fun DadosAlunoScreen(
         }
     }
 
-    // Launcher para selecionar imagem da galeria
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
@@ -70,16 +68,13 @@ fun DadosAlunoScreen(
 
         Button(
             onClick = {
-                // 1. Criamos o objeto Aluno com os dados digitados na tela
-                val novoAluno = com.senai.carteirinha_digital_senai.data.remote.model.Aluno(
+                val novoAluno = Aluno(
                     nome = nome,
                     curso = curso,
                     matricula = matricula,
                     fotoUri = fotoUri,
                     codigoQr = codigoQr
                 )
-
-                // 2. Passamos o objeto único para a ViewModel
                 viewModel.salvarAluno(novoAluno)
                 onDadosSalvos()
             },

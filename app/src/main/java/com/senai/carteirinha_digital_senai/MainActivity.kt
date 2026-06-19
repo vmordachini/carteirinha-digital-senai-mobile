@@ -29,8 +29,8 @@ class MainActivity : ComponentActivity() {
                     AppNavHost(
                         navController = navController,
                         authViewModel = hiltViewModel(),
-                        alunoViewModel = hiltViewModel(),
-                        homeViewModel = hiltViewModel()
+                        alunoViewModel = hiltViewModel()
+                        // homeViewModel é criado dentro da tela de UCs via viewModel()
                     )
                 }
             }

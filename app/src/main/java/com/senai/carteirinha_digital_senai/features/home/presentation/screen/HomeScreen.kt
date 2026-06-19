@@ -1,49 +1,113 @@
 package com.senai.carteirinha_digital_senai.features.home.presentation.screen
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.senai.carteirinha_digital_senai.features.home.viewmodel.HomeViewModel
+import androidx.compose.ui.unit.sp
 
+private val AzulSenai = Color(0xFF032055)
+private val AzulPrimario = Color(0xFF2E33FF)
+
+/**
+ * Tela Home (intermediária) do fluxo:
+ * Login -> Home -> Carteirinha   |   Login -> Home -> Unidades Curriculares
+ *
+ * Funciona como um menu principal com dois destinos de navegação.
+ */
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = viewModel(),
-    onNavigateToCarteirinha: () -> Unit
+    onNavigateToCarteirinha: () -> Unit,
+    onNavigateToUnidades: () -> Unit
 ) {
-    val state by viewModel.state.collectAsState()
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Bem-vindo!",
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
+            color = AzulSenai
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "O que você deseja acessar?",
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color.Gray
+        )
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Minhas Disciplinas", style = MaterialTheme.typography.headlineMedium)
+        Spacer(modifier = Modifier.height(40.dp))
+
+        MenuCard(
+            titulo = "Carteirinha Digital",
+            descricao = "Visualize sua identificação estudantil",
+            icone = Icons.Filled.AccountBox,
+            onClick = onNavigateToCarteirinha
+        )
+
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = onNavigateToCarteirinha, modifier = Modifier.fillMaxWidth()) {
-            Text("Ver Carteirinha Digital")
-        }
+        MenuCard(
+            titulo = "Unidades Curriculares",
+            descricao = "Acompanhe suas disciplinas",
+            icone = Icons.AutoMirrored.Filled.List,
+            onClick = onNavigateToUnidades
+        )
+    }
+}
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (state.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(state.unidades) { uc ->
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(uc.nome, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                            Text("Carga: ${uc.cargaHoraria} | Status: ${uc.status}")
-                        }
-                    }
-                }
+@Composable
+private fun MenuCard(
+    titulo: String,
+    descricao: String,
+    icone: ImageVector,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icone,
+                contentDescription = null,
+                tint = AzulPrimario,
+                modifier = Modifier.size(40.dp)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = titulo,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = AzulSenai
+                )
+                Text(
+                    text = descricao,
+                    fontSize = 13.sp,
+                    color = Color.Gray
+                )
             }
         }
     }

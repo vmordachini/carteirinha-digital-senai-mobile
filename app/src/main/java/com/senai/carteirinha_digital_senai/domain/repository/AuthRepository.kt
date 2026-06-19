@@ -6,5 +6,9 @@ import kotlinx.coroutines.flow.Flow
 interface AuthRepository {
     val authToken: Flow<String?>
     suspend fun fazerLogin(matricula: String, senha: String): Result<LoginResponse>
+
+    /** Login simulado offline: salva um token fictício. Remover quando a API existir. */
+    suspend fun simularLogin()
+
     suspend fun fazerLogout()
 }

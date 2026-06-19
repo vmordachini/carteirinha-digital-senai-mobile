@@ -13,6 +13,7 @@ import com.senai.carteirinha_digital_senai.features.carteirinha.presentation.scr
 import com.senai.carteirinha_digital_senai.features.carteirinha.viewmodel.AlunoViewModel
 import com.senai.carteirinha_digital_senai.features.configuracao.ui.DadosAlunoScreen
 import com.senai.carteirinha_digital_senai.features.home.presentation.screen.HomeScreen
+import com.senai.carteirinha_digital_senai.features.home.presentation.screen.UnidadesCurricularesScreen
 import com.senai.carteirinha_digital_senai.features.home.viewmodel.HomeViewModel
 
 @Composable
@@ -20,61 +21,39 @@ fun AppNavHost(
     navController: NavHostController,
     authViewModel: AuthViewModel,
     alunoViewModel: AlunoViewModel,
-    homeViewModel: HomeViewModel = viewModel() // Instanciado aqui ou passado pela MainActivity
+    homeViewModel: HomeViewModel = viewModel()
 ) {
     val authToken by authViewModel.authToken.collectAsState()
-    val aluno by alunoViewModel.alunoState.collectAsState()
 
-    // Lógica de Destino Inicial:
-    // 1. Sem token -> Login
-    // 2. Com token mas sem perfil preenchido -> Configurar
-    // 3. Tudo ok -> Home (Lista de Disciplinas)
-    val destinoInicial = when {
-        authToken.isNullOrEmpty() -> Routes.Login.route
-        aluno == null -> Routes.Configurar.route
-        else -> Routes.Home.route
-    }
+    // Sem token -> Login. Com token -> Home (menu intermediário).
+    val destinoInicial = if (authToken.isNullOrEmpty()) Routes.Login.route else Routes.Home.route
 
     NavHost(
         navController = navController,
         startDestination = destinoInicial
     ) {
 
-        // --- TELA DE LOGIN ---
+        // --- LOGIN ---
         composable(Routes.Login.route) {
             LoginScreen(viewModel = authViewModel) {
-                // Ao logar, vai para Home ou Configurar
-                val proximaRota = if (aluno == null) Routes.Configurar.route else Routes.Home.route
-                navController.navigate(proximaRota) {
+                // Login -> Home
+                navController.navigate(Routes.Home.route) {
                     popUpTo(Routes.Login.route) { inclusive = true }
                 }
             }
         }
 
-        // --- TELA DE FORMULÁRIO (Configurar) ---
-        composable(Routes.Configurar.route) {
-            DadosAlunoScreen(
-                viewModel = alunoViewModel,
-                onDadosSalvos = {
-                    navController.navigate(Routes.Home.route) {
-                        popUpTo(Routes.Configurar.route) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        // --- TELA DE HOME (Lista de UCs) ---
+        // --- HOME (menu intermediário) ---
         composable(Routes.Home.route) {
             HomeScreen(
-                viewModel = homeViewModel,
-                onNavigateToCarteirinha = {
-                    navController.navigate(Routes.Carteirinha.route)
-                }
+                onNavigateToCarteirinha = { navController.navigate(Routes.Carteirinha.route) },
+                onNavigateToUnidades = { navController.navigate(Routes.Unidades.route) }
             )
         }
 
-        // --- TELA DA CARTEIRINHA ---
+        // --- CARTEIRINHA ---
         composable(Routes.Carteirinha.route) {
+            val aluno by alunoViewModel.alunoState.collectAsState()
             aluno?.let { dados ->
                 CarteirinhaScreen(
                     aluno = dados,
@@ -88,6 +67,25 @@ fun AppNavHost(
                     }
                 )
             }
+        }
+
+        // --- UNIDADES CURRICULARES ---
+        composable(Routes.Unidades.route) {
+            UnidadesCurricularesScreen(
+                onVoltar = { navController.popBackStack() }
+            )
+        }
+
+        // --- CONFIGURAR (editar dados) ---
+        composable(Routes.Configurar.route) {
+            DadosAlunoScreen(
+                viewModel = alunoViewModel,
+                onDadosSalvos = {
+                    navController.navigate(Routes.Carteirinha.route) {
+                        popUpTo(Routes.Configurar.route) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }

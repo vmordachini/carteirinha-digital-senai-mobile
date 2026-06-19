@@ -18,9 +18,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.senai.carteirinha_digital_senai.R
 import com.senai.carteirinha_digital_senai.core.util.gerarQrCode
-import com.senai.carteirinha_digital_senai.data.remote.model.Aluno
+import com.senai.carteirinha_digital_senai.domain.model.Aluno
 import com.senai.carteirinha_digital_senai.features.carteirinha.presentation.component.InfoAluno
 import com.senai.carteirinha_digital_senai.features.carteirinha.presentation.component.PerfilAluno
+
+private val AzulSenai = Color(0xFF032055)
+private val VermelhoSenai = Color(0xFFD50000)
 
 @Composable
 fun CarteirinhaContent(
@@ -32,7 +35,6 @@ fun CarteirinhaContent(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Cabeçalho com Logo e Botões
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -51,7 +53,7 @@ fun CarteirinhaContent(
                     Icon(
                         painter = painterResource(id = android.R.drawable.ic_menu_delete),
                         contentDescription = "Excluir",
-                        tint = Color.Red
+                        tint = VermelhoSenai
                     )
                 }
             }
@@ -59,7 +61,6 @@ fun CarteirinhaContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // O Cartão Principal da Carteirinha
         Card(
             modifier = Modifier.fillMaxWidth().height(450.dp),
             shape = RoundedCornerShape(16.dp),
@@ -71,29 +72,25 @@ fun CarteirinhaContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Utilizando os componentes criados
                 PerfilAluno(fotoUri = aluno.fotoUri)
 
                 InfoAluno(nome = aluno.nome, curso = aluno.curso, matricula = aluno.matricula)
 
-                // Envolvido em remember para não recriar o bitmap a cada recomposição
                 val qrCodeBitmap = remember(aluno.codigoQr) {
                     gerarQrCode(aluno.codigoQr)
                 }
 
-                if (qrCodeBitmap != null) {
-                    Image(
-                        bitmap = qrCodeBitmap.asImageBitmap(),
-                        contentDescription = "QR Code",
-                        modifier = Modifier.size(120.dp)
-                    )
-                }
+                Image(
+                    bitmap = qrCodeBitmap.asImageBitmap(),
+                    contentDescription = "QR Code",
+                    modifier = Modifier.size(120.dp)
+                )
 
                 Text(
                     text = "CARTEIRINHA DIGITAL",
                     fontWeight = FontWeight.Light,
                     letterSpacing = 2.sp,
-                    color = Color.Red
+                    color = AzulSenai
                 )
             }
         }

@@ -8,7 +8,11 @@ class FazerLoginUseCase @Inject constructor(
     private val authRepository: AuthRepository
 ) {
     suspend operator fun invoke(matricula: String, senha: String): Result<LoginResponse> {
-        // futuramente você pode adicionar validações, ex: se a senha tem 6 caracteres
         return authRepository.fazerLogin(matricula, senha)
+    }
+
+    /** Login simulado offline (sem API). */
+    suspend fun simularLogin() {
+        authRepository.simularLogin()
     }
 }

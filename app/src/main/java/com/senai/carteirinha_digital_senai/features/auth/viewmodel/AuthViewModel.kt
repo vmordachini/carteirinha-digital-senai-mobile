@@ -6,7 +6,11 @@ import com.senai.carteirinha_digital_senai.domain.usecase.auth.FazerLoginUseCase
 import com.senai.carteirinha_digital_senai.domain.usecase.auth.FazerLogoutUseCase
 import com.senai.carteirinha_digital_senai.domain.usecase.auth.ObterTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,19 +22,42 @@ class AuthViewModel @Inject constructor(
     obterTokenUseCase: ObterTokenUseCase
 ) : ViewModel() {
 
-    // Note como a chamada agora é feita ao UseCase
     val authToken = obterTokenUseCase().stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = null
     )
 
-    fun login(matricula: String, senha: String, onResult: (Boolean) -> Unit) {
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    /**
+     * Login SIMULADO (sem API).
+     * Como ainda não há backend, o botão "Entrar" sempre autentica com sucesso,
+     * salvando um token fictício. Quando a API existir, basta voltar a chamar
+     * fazerLoginUseCase(matricula, senha) e remover a simulação.
+     */
+    fun fazerLogin(matricula: String, senha: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            // Chamando o UseCase como se fosse uma função graças ao `operator fun invoke`
-            val result = fazerLoginUseCase(matricula, senha)
-            onResult(result.isSuccess)
+            _isLoading.value = true
+            _errorMessage.value = null
+
+            // Pequeno delay só para dar feedback visual de carregamento.
+            delay(400)
+
+            // SIMULAÇÃO: sempre autentica.
+            fazerLoginUseCase.simularLogin()
+
+            _isLoading.value = false
+            onSuccess()
         }
+    }
+
+    fun limparErro() {
+        _errorMessage.value = null
     }
 
     fun fazerLogout() {
